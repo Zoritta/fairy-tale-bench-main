@@ -150,6 +150,7 @@ async function listAudioFiles() {
           clipMap[clipId].location = value;
         } else if (property === "Name") {
           clipMap[clipId].name = value;
+          console.log("Clip Name:", value); // Debug line
         } else if (property === "Type") {
           clipMap[clipId].type = value;
         }
@@ -168,14 +169,41 @@ async function listAudioFiles() {
       }
     }
 
-    audioClips = clips;
+    audioClips = clips; // Store the clips globally for later access
     console.log("Finished processing clips. Total clips found: ", clips.length);
     console.log("Clips: ", clips);
+
+    // Update the audio list UI with the fetched clips
     updateAudioListUI(clips);
   } catch (error) {
     console.error("Error listing audio files:", error);
     displayMessage("Error listing audio files: " + error);
   }
+}
+
+// Function to update the UI with the audio clips
+function updateAudioListUI(clips) {
+  const audioList = document.getElementById("audioList");
+  audioList.innerHTML = ""; // Clear the current list
+
+  clips.forEach((clip, index) => {
+    const li = document.createElement("li");
+    li.textContent = clip.name ? clip.name : `Clip ID: ${clip.id}`; // Display the custom name from the fetched data
+    li.setAttribute("data-id", index); // Store index or ID for future reference
+
+    // Optionally, add dropdown for additional actions
+    const threeDots = document.createElement("span");
+    threeDots.className = "three-dots";
+    threeDots.innerHTML = "&#x22EE;"; // 3 dots symbol
+    li.appendChild(threeDots);
+
+    // Add event listener for dropdown actions if needed
+    threeDots.addEventListener("click", (event) => {
+      // Your dropdown logic here
+    });
+
+    audioList.appendChild(li); // Add the list item to the audio list
+  });
 }
 
 // Function to update the UI with audio clips
@@ -187,7 +215,7 @@ function updateAudioListUI(clips) {
   clips.forEach((clip) => {
     if (clip) {
       const li = document.createElement("li");
-      li.textContent = `${clip.name}`;
+      li.textContent = `${clip.name || "Unnamed Clip"}`;
       const threeDots = document.createElement("span");
       threeDots.textContent = "⋮";
       threeDots.className = "three-dots";
@@ -333,63 +361,70 @@ function renameAudio(clipId) {
       displayMessage("Error renaming audio: " + error);
     });
 }
-// Function to change volume after stopping the current audio
 function changeVolume(newVolume) {
-  console.log("Stopping current audio before changing volume.");
-  displayMessage("Stopping current audio...");
+  // Ensure the volume is within the allowed range (0 to 1000)
+  newVolume = Math.max(0, Math.min(1000, newVolume));
 
-  // First, send a request to stop the currently playing audio
-  stopAudio()
-    .then(() => {
-      console.log(
-        "Audio stopped successfully. Now changing volume to:",
-        newVolume
-      );
-      displayMessage("Audio stopped. Changing volume to: " + newVolume);
+  console.log("Preparing to change volume to:", newVolume);
+  displayMessage("Changing volume to: " + newVolume);
 
-      if (volumeChangeTimeout) {
-        clearTimeout(volumeChangeTimeout);
-      }
+  // Check if there is a currently playing clip
+  if (currentPlayingClipId !== null && currentPlayingClipId !== undefined) {
+    console.log(
+      "Audio is playing. Changing volume for clip:",
+      currentPlayingClipId
+    );
 
-      // Set a delay before sending the volume change request
-      volumeChangeTimeout = setTimeout(() => {
-        const url = `${audioEndpoint}?action=play&clip=${currentPlayingClipId}&volume=${newVolume}`;
-        console.log("Requesting volume change to:", newVolume);
+    // Change the volume for the currently playing clip
+    playAudioWithNewVolume(newVolume, currentPlayingClipId);
+  } else {
+    // No audio is currently playing, show a message to the user
+    console.warn("No audio is playing. Cannot change volume.");
+    displayMessage("First play a song, then change the volume.");
+  }
+}
 
-        // Send the request to change the volume
-        makeGetRequest(url)
-          .then((response) => {
-            if (response) {
-              console.log("Volume change response:", response);
-              displayMessage("Volume changed: " + response);
-              currentVolume = newVolume; // Update current volume
-            } else {
-              console.error("Volume change failed, no response received.");
-              displayMessage("Volume change failed, no response received.");
-            }
-          })
-          .catch((error) => {
-            console.error("Error changing volume:", error);
-            displayMessage("Error changing volume: " + error);
-          });
-      }, 1000); // Delay request to prevent spamming the server
-    })
-    .catch((error) => {
-      console.error("Error stopping audio:", error);
-      displayMessage("Error stopping audio: " + error);
-    });
+// Helper function to play audio with the new volume
+function playAudioWithNewVolume(newVolume, clipId) {
+  if (volumeChangeTimeout) {
+    clearTimeout(volumeChangeTimeout);
+  }
+
+  // Set a short delay before sending the volume change request
+  volumeChangeTimeout = setTimeout(() => {
+    const url = `${audioEndpoint}?action=play&clip=${clipId}&volume=${newVolume}`;
+    console.log(
+      "Requesting volume change to:",
+      newVolume,
+      "for clip ID:",
+      clipId
+    );
+
+    makeGetRequest(url)
+      .then((response) => {
+        if (response) {
+          console.log("Volume change response:", response);
+          displayMessage("Volume changed: " + response);
+          currentVolume = newVolume; // Update current volume
+        } else {
+          console.error("Failed to change volume, no response.");
+          displayMessage("Failed to change volume, no response.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error changing volume:", error);
+        displayMessage("Error changing volume: " + error);
+      });
+  }, 500); // Short delay of 500ms
 }
 
 // Event listener for the volume slider
 volumeSlider.addEventListener("input", function () {
-  const newVolume = this.value;
-
-  // Update the visual slider track
-  sliderTrack.style.width = newVolume / 10 + "%";
-
-  // Call the changeVolume function to adjust volume
-  changeVolume(newVolume);
+  const newVolume = this.value * 10; // Convert slider value (0-100) to (0-1000)
+  sliderTrack.style.width = `${this.value}%`; // Update the visual slider track
+  changeVolume(newVolume); // Call the changeVolume function
 });
+
 // Added Function: Retry for Stale Nonce
 async function makeAuthenticatedRequest(url, method = "GET", body = null) {
   let retryCount = 0;
@@ -452,11 +487,14 @@ async function uploadAudio(file) {
     return;
   }
 
-  const audioName =
-    document.getElementById("audioNameInput").value.trim() || file.name;
+  // Extract the audio name from the input
+  let audioName = document.getElementById("audioNameInput").value.trim();
+  if (!audioName) {
+    audioName = file.name.substring(0, file.name.lastIndexOf("."));
+  }
 
   const formData = new FormData();
-  formData.append("file", file, file.name); // Append the file to form data
+  formData.append("file", file); // Append the file to form data
   formData.append("name", audioName); // Append the audio name
 
   const uploadUrl = `${audioEndpoint}?action=upload&media=audio`;
@@ -475,6 +513,16 @@ async function uploadAudio(file) {
     if (response) {
       displayMessage(`Successfully uploaded: ${audioName}`);
       console.log("Upload successful. Response:", response);
+
+      // Store the uploaded audio information
+      const audioClip = {
+        name: audioName,
+        file: file,
+        // other properties as needed (like ID or URL)
+      };
+
+      // Assuming you have an array to store the uploaded audio clips
+      audioClips.push(audioClip); // Add to the audio clips array
       listAudioFiles(); // Refresh the audio list after upload
     } else {
       displayMessage("Upload failed. Please try again.");
@@ -484,6 +532,7 @@ async function uploadAudio(file) {
     displayMessage("Error uploading file: " + error);
   }
 }
+
 // Function to play a random audio clip excluding IDs 0 and 1
 function playRandomAudio() {
   // Filter out clips with IDs 0 and 1

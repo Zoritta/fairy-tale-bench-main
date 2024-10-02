@@ -139,30 +139,43 @@
         margin-top: 20px;
         text-align: center;
       }
+
+      .volume-control h2 {
+        margin-bottom: 15px; /* Add margin below the heading */
+      }
+
       .volume-slider {
-        width: 80%;
-        margin: 10px auto;
-        background: #ddd;
-        height: 5px;
-        border-radius: 5px;
-        position: relative;
+        width: 100%; /* Full width */
+        max-width: 600px; /* Max width */
+        margin: 10px auto; /* Center the slider */
+        position: relative; /* Position relative for absolute input */
       }
+
       .volume-slider input {
-        width: 100%;
-        height: 5px;
-        opacity: 0;
-        position: absolute;
-        top: 0;
-        left: 0;
+        width: 100%; /* Full width */
+        height: 5px; /* Height of the slider */
+        opacity: 0; /* Keep the input transparent */
+        position: absolute; /* Position on top of the track */
+        top: 0; /* Align with the track */
+        left: 0; /* Align with the track */
+        cursor: pointer; /* Change cursor to pointer */
       }
+
       .volume-slider .slider-track {
-        background: #5a8b50;
-        height: 5px;
-        border-radius: 5px;
-        position: absolute;
-        top: 0;
-        left: 0;
+        background: #5a8b50; /* Track color */
+        height: 5px; /* Height of the track */
+        border-radius: 5px; /* Rounded corners */
+        position: absolute; /* Position relative to the slider */
+        top: 0; /* Align with the input */
+        left: 0; /* Align with the input */
+        width: 100%; /* Full width */
       }
+
+      .upload-section {
+        text-align: center;
+        margin-top: 30px; /* Increase margin above upload section */
+      }
+
       #messageArea {
         display: none; /* Hide the message area */
         margin-top: 20px;

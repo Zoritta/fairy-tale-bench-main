@@ -2,7 +2,7 @@ const serverName = "http://192.168.1.140";
 const audioEndpoint = `${serverName}/axis-cgi/mediaclip.cgi`;
 const listEndpoint = `${serverName}/axis-cgi/param.cgi?action=list&group=MediaClip`;
 let audioClips = [];
-let currentVolume = 100;
+let currentVolume = 50;
 let currentPlayingClipId = null;
 let volumeChangeTimeout = null;
 const volumeSlider = document.getElementById("volumeSlider");
@@ -346,12 +346,20 @@ function changeVolume(newVolume) {
   // Check if there is a currently playing clip
   if (currentPlayingClipId !== null && currentPlayingClipId !== undefined) {
     console.log(
-      "Audio is playing. Changing volume for clip:",
+      "Audio is playing. Stopping audio for clip:",
       currentPlayingClipId
     );
 
-    // Change the volume for the currently playing clip
-    playAudioWithNewVolume(newVolume, currentPlayingClipId);
+    // Call stopAudio and then play audio with new volume after it's stopped
+    stopAudio()
+      .then(() => {
+        // After stopping audio, play with the new volume
+        playAudioWithNewVolume(newVolume, currentPlayingClipId);
+      })
+      .catch((error) => {
+        console.error("Failed to stop audio:", error);
+        displayMessage("Failed to stop audio, cannot change volume.");
+      });
   } else {
     // No audio is currently playing, show a message to the user
     console.warn("No audio is playing. Cannot change volume.");
@@ -365,15 +373,9 @@ function playAudioWithNewVolume(newVolume, clipId) {
     clearTimeout(volumeChangeTimeout);
   }
 
-  // Set a short delay before sending the volume change request
   volumeChangeTimeout = setTimeout(() => {
     const url = `${audioEndpoint}?action=play&clip=${clipId}&volume=${newVolume}`;
-    console.log(
-      "Requesting volume change to:",
-      newVolume,
-      "for clip ID:",
-      clipId
-    );
+    console.log("Requesting volume change with URL:", url);
 
     makeGetRequest(url)
       .then((response) => {
@@ -390,7 +392,7 @@ function playAudioWithNewVolume(newVolume, clipId) {
         console.error("Error changing volume:", error);
         displayMessage("Error changing volume: " + error);
       });
-  }, 500); // Short delay of 500ms
+  }, 500);
 }
 
 // Event listener for the volume slider

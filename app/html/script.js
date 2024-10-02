@@ -187,7 +187,7 @@ function updateAudioListUI(clips) {
   clips.forEach((clip) => {
     if (clip) {
       const li = document.createElement("li");
-      li.textContent = `${clip.name} - Clip ID: ${clip.id}`;
+      li.textContent = `${clip.name}`;
       const threeDots = document.createElement("span");
       threeDots.textContent = "⋮";
       threeDots.className = "three-dots";
@@ -452,13 +452,17 @@ async function uploadAudio(file) {
     return;
   }
 
+  const audioName =
+    document.getElementById("audioNameInput").value.trim() || file.name;
+
   const formData = new FormData();
   formData.append("file", file, file.name); // Append the file to form data
+  formData.append("name", audioName); // Append the audio name
 
   const uploadUrl = `${audioEndpoint}?action=upload&media=audio`;
 
   // Display message for the start of the upload
-  displayMessage(`Uploading ${file.name}...`);
+  displayMessage(`Uploading ${audioName}...`);
 
   try {
     // Make POST request to upload the file
@@ -469,7 +473,7 @@ async function uploadAudio(file) {
     );
 
     if (response) {
-      displayMessage(`Successfully uploaded: ${file.name}`);
+      displayMessage(`Successfully uploaded: ${audioName}`);
       console.log("Upload successful. Response:", response);
       listAudioFiles(); // Refresh the audio list after upload
     } else {

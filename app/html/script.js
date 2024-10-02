@@ -180,32 +180,6 @@ async function listAudioFiles() {
     displayMessage("Error listing audio files: " + error);
   }
 }
-
-// Function to update the UI with the audio clips
-function updateAudioListUI(clips) {
-  const audioList = document.getElementById("audioList");
-  audioList.innerHTML = ""; // Clear the current list
-
-  clips.forEach((clip, index) => {
-    const li = document.createElement("li");
-    li.textContent = clip.name ? clip.name : `Clip ID: ${clip.id}`; // Display the custom name from the fetched data
-    li.setAttribute("data-id", index); // Store index or ID for future reference
-
-    // Optionally, add dropdown for additional actions
-    const threeDots = document.createElement("span");
-    threeDots.className = "three-dots";
-    threeDots.innerHTML = "&#x22EE;"; // 3 dots symbol
-    li.appendChild(threeDots);
-
-    // Add event listener for dropdown actions if needed
-    threeDots.addEventListener("click", (event) => {
-      // Your dropdown logic here
-    });
-
-    audioList.appendChild(li); // Add the list item to the audio list
-  });
-}
-
 // Function to update the UI with audio clips
 function updateAudioListUI(clips) {
   const list = document.getElementById("audioList");
@@ -275,22 +249,23 @@ function toggleDropdownMenu(li) {
 
 // Function to play audio
 function playAudio(clipId) {
-  const url = `${audioEndpoint}?action=play&clip=${clipId}&volume=${currentVolume}`;
-  console.log("Playing audio with Clip ID: ", clipId);
-  console.log("Request URL: ", url);
-  displayMessage("Playing audio with Clip ID: " + clipId);
+  const url = `${audioEndpoint}?action=play&clip=${clipId}`;
 
   makeGetRequest(url)
     .then((response) => {
-      console.log("Playing:", response);
-      displayMessage("Playing: " + response);
+      if (response) {
+        console.log("Audio started successfully:", response);
+        displayMessage("Playing clip: " + clipId);
+        currentPlayingClipId = clipId; // Update the currentPlayingClipId when the audio starts
+      } else {
+        console.error("Failed to play audio.");
+        displayMessage("Failed to play audio.");
+      }
     })
     .catch((error) => {
       console.error("Error playing audio:", error);
       displayMessage("Error playing audio: " + error);
     });
-
-  currentPlayingClipId = clipId;
 }
 
 // Function to delete audio
@@ -321,7 +296,7 @@ function stopAudio() {
       .then((response) => {
         console.log("Stopped:", response);
         displayMessage("Stopped: " + response);
-        currentPlayingClipId = null; // Resetting it here after stopping
+
         resolve(response); // Resolve the promise with the response
       })
       .catch((error) => {

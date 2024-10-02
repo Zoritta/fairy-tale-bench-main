@@ -1,0 +1,6 @@
+#!/bin/sh -ed
+
+
+while true; do
+	sleep 604800
+done

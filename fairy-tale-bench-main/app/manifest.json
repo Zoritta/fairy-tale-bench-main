@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.6.0",
+  "acapPackageConf": {
+    "setup": {
+      "appName": "audiomanager",
+      "vendor": "Axis Communications",
+      "version": "1.0.0",
+      "runMode": "respawn",
+      "embeddedSdkVersion": "3.0"
+    },
+    "configuration": {
+      "settingPage": "index.html"
+    }
+  },
+  "resources": {
+    "dbus": {
+      "requiredMethods": [
+        "com.axis.HTTPConf1.VAPIXServiceAccounts1.GetCredentials"
+      ]
+    }
+  }
+}

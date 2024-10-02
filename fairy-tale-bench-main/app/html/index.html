@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SagoBänken</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        margin: 0;
+        padding: 20px;
+      }
+      h1 {
+        text-align: center;
+        color: #4a9a59;
+      }
+      .banner {
+        width: 100%;
+        height: 150px;
+        background-color: #6a9a59;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+      .banner .logo {
+        max-height: 100px; /* Adjust logo size */
+        margin-right: 20px; /* Add space between logo and text */
+      }
+      .banner h2 {
+        color: white;
+        font-size: 24px;
+        margin: 0;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 20px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+      }
+      .audio-list,
+      .upload-section {
+        margin-top: 20px;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      li {
+        background: #a2d08e; /* Softer green for list items */
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+      }
+      .three-dots {
+        cursor: pointer;
+        font-size: 20px;
+        color: #0c0c0b;
+      }
+      .dropdown-menu {
+        display: none;
+        position: absolute;
+        right: 10px;
+        top: 35px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        z-index: 1;
+      }
+      .dropdown-menu button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        border: none;
+        background: white;
+        text-align: left;
+        cursor: pointer;
+        color: #a2d08e;
+      }
+      .dropdown-menu button:hover {
+        background: #f0f0f0;
+      }
+      .control-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+      .control-buttons button,
+      .upload-section button {
+        background: #6a9a59; /* Vivid green for buttons */
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .control-buttons button:hover,
+      .upload-section button:hover {
+        background: #5a8b50;
+      }
+      .upload-section {
+        text-align: center;
+      }
+      .upload-section input[type="file"] {
+        display: none;
+      }
+      .upload-section label {
+        background: #5a8b50;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-right: 10px;
+      }
+      .upload-section label:hover {
+        background: #5a8b50;
+      }
+      .upload-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        align-items: center;
+      }
+      .upload-buttons span {
+        font-size: 16px;
+        color: #333;
+      }
+      .volume-control {
+        margin-top: 20px;
+        text-align: center;
+      }
+      .volume-slider {
+        width: 80%;
+        margin: 10px auto;
+        background: #ddd;
+        height: 5px;
+        border-radius: 5px;
+        position: relative;
+      }
+      .volume-slider input {
+        width: 100%;
+        height: 5px;
+        opacity: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      .volume-slider .slider-track {
+        background: #5a8b50;
+        height: 5px;
+        border-radius: 5px;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      #messageArea {
+        display: none; /* Hide the message area */
+        margin-top: 20px;
+        text-align: center;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="banner">
+      <img src="municipality-logo.jpg" alt="Municipality Logo" class="logo" />
+      <h2>Biblioteken i Burlöv</h2>
+    </div>
+    <div class="container">
+      <h1>SagoBänken</h1>
+      <div class="audio-list">
+        <h2>Sagor</h2>
+        <ul id="audioList"></ul>
+      </div>
+      <div class="control-buttons">
+        <button id="randomPlayButton" aria-label="Play random audio clip">
+          Playshuffle
+        </button>
+        <button id="stopButton" aria-label="Stop playing audio">Stoppa</button>
+      </div>
+      <div class="volume-control">
+        <h2>Volymkontroll</h2>
+        <div class="volume-slider">
+          <div class="slider-track" id="sliderTrack"></div>
+          <input
+            type="range"
+            id="volumeSlider"
+            min="0"
+            max="1000"
+            value="100"
+          />
+        </div>
+      </div>
+      <div class="upload-section">
+        <h2>Ladda upp ny saga</h2>
+        <div class="upload-buttons">
+          <label for="fileInput">Välj saga</label>
+          <span id="fileName">Ingen saga vald</span>
+          <input type="file" id="fileInput" accept=".mp3, .wav, .mpeg" />
+          <button id="uploadButton" aria-label="Upload selected audio file">
+            Ladda upp
+          </button>
+        </div>
+      </div>
+      <div id="messageArea"></div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

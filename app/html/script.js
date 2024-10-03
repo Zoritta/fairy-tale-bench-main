@@ -498,7 +498,6 @@ async function uploadAudio(file) {
         // other properties as needed (like ID or URL)
       };
 
-      // Assuming you have an array to store the uploaded audio clips
       audioClips.push(audioClip); // Add to the audio clips array
       listAudioFiles(); // Refresh the audio list after upload
     } else {

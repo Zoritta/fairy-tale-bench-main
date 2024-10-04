@@ -1,4 +1,4 @@
-const serverName = "http://192.168.1.140";
+const serverName = "http://192.168.0.40";
 const audioEndpoint = `${serverName}/axis-cgi/mediaclip.cgi`;
 const listEndpoint = `${serverName}/axis-cgi/param.cgi?action=list&group=MediaClip`;
 let audioClips = [];

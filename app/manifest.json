@@ -2,7 +2,7 @@
   "schemaVersion": "1.6.0",
   "acapPackageConf": {
     "setup": {
-      "appName": "audiomanager",
+      "appName": "sagobanken",
       "vendor": "Axis Communications",
       "version": "1.0.0",
       "runMode": "respawn",

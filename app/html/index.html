@@ -160,15 +160,8 @@
         cursor: pointer;
       }
 
-      .slider-track {
-        background: #5a8b50; /* Green track color */
-        height: 5px; /* Height of the track */
-        border-radius: 5px; /* Rounded corners */
-        position: absolute; /* Relative to its parent */
-        top: 50%; /* Center the track vertically */
-        left: 0;
-        width: 100%; /* Full width of the container */
-        transform: translateY(-50%); /* Proper centering */
+      .color {
+        accent-color: #5a8b50;
       }
 
       .upload-section {
@@ -204,8 +197,8 @@
       <div class="volume-control">
         <h2>Volymkontroll</h2>
         <div class="volume-slider">
-          <div class="slider-track" id="sliderTrack"></div>
           <input
+            class="color"
             type="range"
             id="volumeSlider"
             min="0"

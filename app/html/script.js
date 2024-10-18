@@ -506,7 +506,10 @@ async function uploadAudio(file) {
   formData.append("file", file); // Append the file to form data
   formData.append("name", audioName); // Append the audio name
 
-  const uploadUrl = `${audioEndpoint}?action=upload&media=audio`;
+  const uploadUrl = `${audioEndpoint}?action=upload&media=audio&name=${encodeURIComponent(
+    audioName
+  )}
+`;
 
   // Display message for the start of the upload
   displayMessage(`Uploading ${audioName}...`);

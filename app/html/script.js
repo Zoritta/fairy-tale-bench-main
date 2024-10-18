@@ -1,4 +1,4 @@
-const serverName = "http://192.168.0.40";
+const serverName = "http://192.168.1.40";
 const audioEndpoint = `${serverName}/axis-cgi/mediaclip.cgi`;
 const listEndpoint = `${serverName}/axis-cgi/param.cgi?action=list&group=MediaClip`;
 let audioClips = [];
@@ -183,37 +183,51 @@ async function listAudioFiles() {
 // Function to update the UI with audio clips
 function updateAudioListUI(clips) {
   const list = document.getElementById("audioList");
-  list.innerHTML = "";
+  list.innerHTML = ""; // Clear existing list
   console.log("Updating UI with audio clips...");
+
+  // Check if clips array is empty
+  if (clips.length === 0) {
+    const emptyMessage = document.createElement("li");
+    emptyMessage.textContent = "No audio clips available.";
+    list.appendChild(emptyMessage);
+  }
 
   clips.forEach((clip) => {
     if (clip) {
       const li = document.createElement("li");
-      li.textContent = `${clip.name || "Unnamed Clip"}`;
+      li.textContent = clip.name || "Unnamed Clip"; // Use 'Unnamed Clip' if no name is provided
+
+      // Create the three dots for dropdown
       const threeDots = document.createElement("span");
       threeDots.textContent = "⋮";
       threeDots.className = "three-dots";
       threeDots.onclick = () => toggleDropdownMenu(li);
       li.appendChild(threeDots);
 
+      // Create dropdown menu
       const dropdownMenu = document.createElement("div");
       dropdownMenu.className = "dropdown-menu";
 
+      // Create and append Play button
       const playButton = document.createElement("button");
       playButton.textContent = "Play";
       playButton.onclick = () => playAudio(clip.id);
       dropdownMenu.appendChild(playButton);
 
+      // Create and append Delete button
       const deleteButton = document.createElement("button");
       deleteButton.textContent = "Delete";
       deleteButton.onclick = () => deleteAudio(clip.id);
       dropdownMenu.appendChild(deleteButton);
 
+      // Create and append Rename button
       const renameButton = document.createElement("button");
       renameButton.textContent = "Rename";
       renameButton.onclick = () => renameAudio(clip.id);
       dropdownMenu.appendChild(renameButton);
 
+      // Create and append Stop button
       const stopButton = document.createElement("button");
       stopButton.textContent = "Stop";
       stopButton.onclick = () => stopAudio();
@@ -221,8 +235,14 @@ function updateAudioListUI(clips) {
 
       li.appendChild(dropdownMenu);
 
+      // Hide dropdown menu on mouse leave
       li.onmouseleave = () => {
         dropdownMenu.style.display = "none";
+      };
+
+      // Optionally, handle mouse over to show dropdown
+      li.onmouseenter = () => {
+        dropdownMenu.style.display = "block"; // Show dropdown when mouse enters
       };
 
       list.appendChild(li);
@@ -449,7 +469,7 @@ async function makeAuthenticatedRequest(url, method = "GET", body = null) {
 
   return result;
 }
-// Function to upload audio file
+
 async function uploadAudio(file) {
   // Check the file type and size before uploading
   if (!ALLOWED_FILE_TYPES.includes(file.type)) {
@@ -464,11 +484,23 @@ async function uploadAudio(file) {
     return;
   }
 
-  // Extract the audio name from the input
-  let audioName = document.getElementById("audioNameInput").value.trim();
-  if (!audioName) {
-    audioName = file.name.substring(0, file.name.lastIndexOf("."));
+  // Check if the audioNameInput element exists in the DOM
+  let audioNameInputElement = document.getElementById("audioNameInput");
+  let audioName = "";
+
+  if (audioNameInputElement) {
+    // Get user input value and trim whitespace
+    audioName = audioNameInputElement.value.trim();
+  } else {
+    console.warn("audioNameInput element not found in the DOM.");
   }
+
+  // If input is empty, fallback to using the original file name
+  if (!audioName) {
+    audioName = file.name; // Use the full file name, including the extension
+  }
+
+  console.log("Audio name before upload:", audioName);
 
   const formData = new FormData();
   formData.append("file", file); // Append the file to form data
@@ -495,7 +527,6 @@ async function uploadAudio(file) {
       const audioClip = {
         name: audioName,
         file: file,
-        // other properties as needed (like ID or URL)
       };
 
       audioClips.push(audioClip); // Add to the audio clips array

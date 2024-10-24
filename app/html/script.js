@@ -417,7 +417,7 @@ function playAudioWithNewVolume(newVolume, clipId) {
 
 // Event listener for the volume slider
 volumeSlider.addEventListener("input", function () {
-  const newVolume = this.value; // Convert slider value (0-100) to (0-1000)
+  const newVolume = this.value;
   changeVolume(newVolume); // Call the changeVolume function
 });
 

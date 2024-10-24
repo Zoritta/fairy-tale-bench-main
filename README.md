@@ -2,8 +2,7 @@
 
 This is an application that will run on AXIS C1610-VE Network Sound Projector, it is a basic custom app to manage audio files on the speaker.
 
-![Screenshot of the one page ui](images/UI.shot.png)
-
+![Screenshot of the one page ui](images/UI.png)
 
 ## Installation
 
@@ -21,5 +20,3 @@ To read about developing applications to be deployed on AXIS devices go to [ACAP
 ## Authors and acknowledgment
 
 Joakim Roubert at AxisCommunications was a big help and support.
-
-
